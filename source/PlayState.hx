@@ -22,7 +22,6 @@ class PlayState extends FlxState
 		add(balaDePers);
 		
 		nave1 = new Enemigo(40, 10);
- 		nave1.velocity.y = 100;
  		
  		add(nave1);
 	}
@@ -35,7 +34,6 @@ class PlayState extends FlxState
  		{
  			remove(nave1);
  			nave1.destroy();
- 			
  		}
 		if (FlxG.keys.justPressed.SPACE) 
 		{
