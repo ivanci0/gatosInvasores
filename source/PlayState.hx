@@ -3,58 +3,115 @@ package;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.FlxState;
+import flixel.math.FlxRandom;
 import flixel.text.FlxText;
-import flixel.ui.FlxButton;
-import flixel.math.FlxMath;
+import flixel.util.FlxTimer;
 
 class PlayState extends FlxState
 {
-	private var nave1:Enemigo;
-	private var nave2:Enemigo;
+	private var grupoEnemigo:Array<Enemigo> = new Array<Enemigo>();
+	private var balas:Array<Bala> = new Array<Bala>();
 	private var nave:Personaje;
-	private var balaDePers:Bala;
+	private var bonus:Bonus;
+	//de prueba
+	private var prueba:Int = 10;
+	private var unNum:Int = 0;
+	private var enemPrueba:Enemigo;
+	private var otroEnem:Enemigo;
+	private var genRandom:FlxRandom = new FlxRandom();
+	private var timer:FlxTimer = new FlxTimer();
 	override public function create():Void
 	{
 		super.create();
 		
 		nave = new Personaje(0, 130);
- 		add(nave);
-		balaDePers = new Bala();
-		add(balaDePers);
+		bonus = new Bonus();
+		enemPrueba = new Enemigo(40, 10);
+		otroEnem = new Enemigo(50, 10);
 		
-		nave1 = new Enemigo(40, Reg.superejeY);
-		nave2 = new Enemigo(50, Reg.superejeY);
- 		
- 		add(nave1);
-		add(nave2);
+		for (i in 0...5) 
+		{
+			grupoEnemigo[i] = new Enemigo(20 + i * 10, 20);
+			add(grupoEnemigo[i]);
+		}
+		for (j in 0...2) 
+		{
+			balas[j] = new Bala();
+			add(balas[j]);
+		}
+		timer.start(10, null, 0);
+		
+		add(bonus);
+ 		add(nave);
+		add(enemPrueba);
+		add(otroEnem);
+		add(nave.getBala());
 	}
 
 	override public function update(elapsed:Float):Void
 	{
 		super.update(elapsed);
 		
-		if (nave1.y > FlxG.height-nave1.height)
- 		{
- 			remove(nave1);
- 			nave1.destroy();
- 		}
-		if (nave2.y > FlxG.height-nave2.height)
- 		{
- 			remove(nave2);
- 			nave2.destroy();
- 		}
-		if (FlxG.keys.justPressed.SPACE) 
+		
+		//movimiento?
+		enemPrueba.Move();
+		otroEnem.Move();
+		
+		// colisiones
+		ColisionConEnemigo();
+		ColisionConBonus();
+		ColisionConPersonaje();
+		ColisionEnemigoJugador();
+		
+		// pruba
+		if (prueba == 0) 
 		{
-			if (balaDePers.y == 1000 && balaDePers.x == 1000) 
+			if (bonus.getPosicionada() == true) 
 			{
-				balaDePers.Disparar(nave);
+				bonus.Mover();
+			}
+			balas[0].DispararEnemigo(grupoEnemigo[genRandom.int(0, grupoEnemigo.length-1)]);
+			prueba = 200;
+		}
+		else 
+		{
+			prueba--;
+		}
+	}
+	public function ColisionConEnemigo():Void{
+		for (i in 0...grupoEnemigo.length) 
+		{
+			if (FlxG.overlap(grupoEnemigo[i],nave.getBala())) 
+			{
+				grupoEnemigo[i].destroy();
+				nave.getBala().Posicionar();
 			}
 		}
-		if (balaDePers.y < 0) 
+	}
+	public function ColisionConBonus():Void{
+		if (FlxG.overlap(bonus,nave.getBala())) 
 		{
-			balaDePers.Posicionar();
+			bonus.Posicionar();
+			nave.getBala().Posicionar();
 		}
-		nave1.Move();
-		nave2.Move();
+	}
+	public function ColisionConPersonaje():Void{
+		for (i in 0...balas.length) 
+		{
+			if (FlxG.overlap(nave,balas[i])) 
+			{
+				trace("Choca con nave");
+				balas[i].Posicionar();
+			}
+		}
+	}
+	public function ColisionEnemigoJugador():Void{
+		for (i in 0...grupoEnemigo.length) 
+		{
+			if (FlxG.overlap(grupoEnemigo[i],nave)) 
+			{
+				trace("choca" + grupoEnemigo[i]);
+			}
+		}
 	}
 }
