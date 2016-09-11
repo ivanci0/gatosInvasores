@@ -1,8 +1,8 @@
 package;
 
 import flixel.FlxSprite;
-import flixel.system.FlxAssets.FlxGraphicAsset;
 import flixel.FlxG;
+import flixel.util.FlxTimer;
 
 /**
  * ...
@@ -14,14 +14,15 @@ class Enemigo extends FlxSprite
   	private var thebadguyY:Int;
   	private var thebadguyModifier:Bool;
  	private var equalizer:Int;
-	public function new(?X:Float=0, ?Y:Float=0, ?SimpleGraphic:FlxGraphicAsset) 
+	private var elTimer:FlxTimer = new FlxTimer();
+	public function new(?X:Float=0, ?Y:Float=0) 
 	{
-		super(X, Y, SimpleGraphic);
-		
-		makeGraphic(5, 5, 0xFFFF000F);
-		//velocity.y = 50;
+		super(X, Y);
+		elTimer.start(1, Move, 0);
+		loadGraphic(AssetPaths.singlecat__png, true, 16, 16);
+		animation.add("mov", [0, 1], 10, false);
   		thebadguyY = 8;
- 		equalizer = 5;
+ 		equalizer = 4;
 		
 	}
 	
@@ -30,28 +31,27 @@ class Enemigo extends FlxSprite
 		super.update(elapsed);
 		
 	}
-	public function Move():Void
- 	{
- 		if (Reg.movementModifier == true)
- 		{
- 		    x += 0.5;
- 			y = Reg.superejeY;
- 		}
- 		if (Reg.movementModifier == false)
- 		{
- 			x -= 0.5;
- 			y = Reg.superejeY;
- 		}
- 		if (x == 155)
- 		{
- 			Reg.movementModifier = false;
- 			Reg.superejeY += thebadguyY;
- 		}
- 		if (x == equalizer)
- 		{
- 			Reg.movementModifier = true;
- 			Reg.superejeY += thebadguyY;
- 		}
+	public function Move(timer:FlxTimer):Void{
+		if (alive) 
+		{
+			animation.play("mov");
+			if (Reg.movementModifier == true){
+				x += equalizer;
+				y = Reg.superejeY;
+			}
+			if (Reg.movementModifier == false){
+				x -= equalizer;
+				y = Reg.superejeY;
+			}
+			if (x >= 155){
+				Reg.movementModifier = false;
+				Reg.superejeY += thebadguyY;
+			}
+			if (x == equalizer){
+				Reg.movementModifier = true;
+				Reg.superejeY += thebadguyY;
+			}
+		}
   	}
 	
 }
